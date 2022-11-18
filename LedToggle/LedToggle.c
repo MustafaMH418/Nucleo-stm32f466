@@ -6,7 +6,7 @@ int main(void)
     
     uint32_t *pClKctrlR = (uint32_t*)0x40023830;		//Address of RCC_AHB1ENR
     uint32_t *pPortModeR = (uint32_t*)0x40020000;		//Address of Port Mode Register
-    uint32_t *pODR = (uint32_t*)0x40020014;			    //Address of Output Data Register
+    uint32_t *pODR = (uint32_t*)0x40020014;			//Address of Output Data Register
 
     //Setting RCC_AHB1ENR To Enable CLock for GPioA
     *pClKctrlR |= 1;
