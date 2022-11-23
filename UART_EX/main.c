@@ -5,8 +5,6 @@
  *      Author: musta
  */
 
-// App that takes smallcase words or sentences from the user and send them back as capitalcase letters ( to exercise the working of uart2 comm with pc)
-
 #include "main.h"
 
 
