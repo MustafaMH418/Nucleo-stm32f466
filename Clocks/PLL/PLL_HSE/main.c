@@ -73,7 +73,7 @@ void SystemClock_Config(){
 	switch(clock_freq){
 	case SYS_CLK_FREQ_50_MHZ :
 	{
-		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLM = 8;
 		osc_init.PLL.PLLN = 100;
 		osc_init.PLL.PLLP = 2 ;
 		osc_init.PLL.PLLR = 2 ;
@@ -91,7 +91,7 @@ void SystemClock_Config(){
 
 	case SYS_CLK_FREQ_84_MHZ:
 	{
-		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLM = 8;
 		osc_init.PLL.PLLN = 168;
 		osc_init.PLL.PLLP = 2 ;
 		osc_init.PLL.PLLR = 2 ;
@@ -107,7 +107,7 @@ void SystemClock_Config(){
 
 	case SYS_CLK_FREQ_120_MHZ:
 	{
-		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLM = 8;
 		osc_init.PLL.PLLN = 240;
 		osc_init.PLL.PLLP = 2 ;
 		osc_init.PLL.PLLR = 2 ;
