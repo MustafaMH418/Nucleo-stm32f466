@@ -1,0 +1,2 @@
+Using Stm32Cube Mx and Stm32Cube IDE to write the code 
+Using Tera Term to capture data between microcontroller and pc
