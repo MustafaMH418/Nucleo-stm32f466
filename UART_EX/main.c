@@ -69,5 +69,5 @@ void SystemClock_Config(){
 }
 
 void Error_Handler(){
-
+	While(1);		// Hang code here
 }
