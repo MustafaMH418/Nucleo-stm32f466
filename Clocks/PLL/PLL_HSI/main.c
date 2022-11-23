@@ -1,9 +1,4 @@
-/*
- * main.c
- *
- *  Created on: Nov 21, 2022
- *      Author: musta
- */
+
 
 
 #include "main.h"
