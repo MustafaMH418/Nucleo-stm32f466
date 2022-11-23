@@ -83,7 +83,7 @@ void SystemClock_Config(){
 		osc_init.PLL.PLLQ = 2 ;
 
 		clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-		clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_HSE ;
+		clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_HSI ;
 		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV2 ;
 		clk_init.APB1CLKDivider = RCC_HCLK_DIV2 ;
 		clk_init.APB2CLKDivider = RCC_HCLK_DIV2 ;
@@ -100,7 +100,7 @@ void SystemClock_Config(){
 		osc_init.PLL.PLLR = 2 ;
 		osc_init.PLL.PLLQ = 2 ;
 		clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-		clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_HSE ;
+		clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_HSI ;
 		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV2 ;
 		clk_init.APB1CLKDivider = RCC_HCLK_DIV2 ;
 		clk_init.APB2CLKDivider = RCC_HCLK_DIV2 ;
@@ -116,7 +116,7 @@ void SystemClock_Config(){
 		osc_init.PLL.PLLR = 2 ;
 		osc_init.PLL.PLLQ = 2 ;
 		clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-		clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_HSE ;
+		clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_HSI ;
 		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV2 ;
 		clk_init.APB1CLKDivider = RCC_HCLK_DIV4 ;
 		clk_init.APB2CLKDivider = RCC_HCLK_DIV2 ;
