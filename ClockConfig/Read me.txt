@@ -1,0 +1,7 @@
+App that changes the system clock of the microcontroller to HSE with settings
+      HSE = 8Mhz
+      Hclk = 4Mhz
+      Pclk1 = 2Mhz
+      Pclk2 = 2Mhz
+      
+The App sets the clock then send the actual running clocks using HAL_RCC_GETCLOCK  APIs and UART2 to the PC
