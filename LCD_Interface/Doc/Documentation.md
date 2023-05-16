@@ -107,6 +107,7 @@ Wait at least 15ms after the module power up to allow the power to stabilize.
   
  This can be seen in the code by 
  ```c
+ void LCD_Init(){
     HAL_Delay(50);
 	Lcd_Write(0x03,0);
 	HAL_Delay(5);
@@ -128,8 +129,72 @@ Wait at least 15ms after the module power up to allow the power to stabilize.
 	HAL_Delay(2);
 	Lcd_Send_Cmd(0x0C);
 	HAL_Delay(2);
+	}
 ```
 
 After this initialization sequence, the module is ready to receive commands and data from the controller to display characters and other information on the screen.
 
+> **Note**
+> Until the command (0x02) is sent the Lcd module will be working in 8-Bit mode but code is sending only 4-bits on the D4-D7 only but after sending the command (0x02) code must send the full 8-bit data on two steps as explained above
 
+> **HAL_Delay**
+> In the code, the ```HAL_Delay``` function is utilized as a wait command, instead of configuring a dedicated timer for this purpose. It should be noted, however, that ```HAL_Delay``` relies on the Systick timer to achieve its functionality. The Systick timer must tick every 1ms with accuracy in order for ```HAL_Delay``` to work as intended. If the clock in the program is changed or reconfigured, it may be necessary to reconfigure the Systick timer to ensure proper functioning of the ```HAL_Delay``` function. 
+> I found Systick clock configure using this to be very helpful 
+```c
+HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+ ```
+ 
+## Third : Writing on LCD
+
+To send data and commands to the LCD module, two steps are required:\
+	1.  GPIO pins used for communication with the LCD module must be configured properly.\
+	2. A set of functions must be written that utilize these pins to send data and commands to the module.\
+
+
+### 1.GPIO Configuration
+Configuring a GPIO pin needs 3 Steps
+1. Enabling the Clock to GPIO\
+	We can do that using the Macro
+	```c
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	```
+	but since we are using pins from both GPIOA and GPIOB we will also need to enable the clock for GPIOB
+	```c
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	```
+	<br />
+2. Defining a typedef which will have the parameters of the pin
+	There is a typedef also provided by the HAL Layer ```GPIO_InitTypeDef``` that we can use to define the parameters of each pin and we see that in 
+	```c
+	GPIO_InitTypeDef GPIO_init;
+	```
+	we can define the Pins from each GPIO in one process as they will have the same parameters
+	```c
+	GPIO_init.Pin = rs_pin | en_pin | D7_pin;
+	GPIO_init.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_init.Pull = GPIO_PULLDOWN;
+	```
+	and for pins from GPIOA
+	```c
+	GPIO_init.Pin = D6_pin | D5_pin | D4_pin;
+	GPIO_init.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_init.Pull = GPIO_PULLDOWN;
+	```
+> ***Note***
+> All the Pins are defined by Macros in the header file which is inclueded in the project and you can refer to
+<br />
+
+3. Initilizing the GPIO with the dedicated typedef
+	To initilize GPIO we can use ```HAL_GPIO_Init()``` Which is also Implemented in the HAL Layer , This function takes two arguments which are The base address of the GPIO and a pointer to the ```GPIO_InitTypedef``` and return nothing. The function can be used as following
+	```c
+	HAL_GPIO_Init(GPIOB, &GPIO_init);
+	```
+	Which will used be after defining parameters of pins related to GPIOB since we are using the same structure to hold data of both pins sequentially
+	```c
+	HAL_GPIO_Init(GPIOA, &GPIO_init);
+	```
+	Which will be used after defining parameters of pins related to GPIOA
+By now we finished all the configurations needed for the GPIO Pins
+> ***Warning***
+> All GPIO Pins Configurations needed must be done BEFORE initilizing the lcd or any communications with the lcd module 
