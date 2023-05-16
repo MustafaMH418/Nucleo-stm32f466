@@ -226,7 +226,7 @@ the function have to set and reset the ```EN``` pin as this signals the LCD modu
 > I added a delay of 10ms between setting ```EN``` and Resetting it just to give the LCD module a time to read the sent data 
 <br />
 
-2. ***Data Send Function***
+2. ***Data Send Function*** \
 A function that will break any 8-bit data it recieves and give it to the Write function as two parts (4-bit) while giving value of ```RS``` of ```1```
 ```c
 void Lcd_Send_Data(char data){
@@ -245,4 +245,18 @@ void Lcd_Send_String(char *str){
 		Lcd_Send_Data(*str++);
 }
 ```
+This function will keep sending 1 byte at a time to Data send function until it meets ```\0``` which indicates end of string
+
+3. ***Command Send Function*** \
+This function will act in the same way as the ```Data Send Function``` but it will be used only for commands ( RS Value = 0 )
+```c
+void Lcd_Send_Cmd(char cmd){
+	char cmd_to_send = 0;
+	cmd_to_send = (cmd >> 4) & 0x0f ;
+	Lcd_Write(cmd_to_send,0);
+	cmd_to_send = cmd & 0x0f ;
+	Lcd_Write(cmd_to_send,0);
+}
+```
+
 
