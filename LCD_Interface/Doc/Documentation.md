@@ -198,3 +198,51 @@ Configuring a GPIO pin needs 3 Steps
 By now we finished all the configurations needed for the GPIO Pins
 > ***Warning***
 > All GPIO Pins Configurations needed must be done BEFORE initilizing the lcd or any communications with the lcd module 
+<br />
+<br />
+
+### 2. Functions to Transfer data to LCD
+1. ***Write Function*** <br />
+	This will be the base function that will break down command or data and send it on the parallel 4 lines, The function will take 2 arguments which will be the data or command to send and the value of RS. RS value will be ```1``` in case of data and will be ```0``` in case of commands
+	
+```c
+void Lcd_Write(char data, uint8_t rs){
+	HAL_GPIO_WritePin(rs_port, rs_pin, rs);
+
+	HAL_GPIO_WritePin(D7_port, D7_pin, (data>>3)&0x01);
+	HAL_GPIO_WritePin(D6_port, D6_pin, (data>>2)&0x01);
+	HAL_GPIO_WritePin(D5_port, D5_pin, (data>>1)&0x01);
+	HAL_GPIO_WritePin(D4_port, D4_pin, (data>>0)&0x01);
+
+	HAL_GPIO_WritePin(en_port, en_pin, GPIO_PIN_SET);
+	HAL_Delay(10);
+	HAL_GPIO_WritePin(en_port, en_pin, GPIO_PIN_RESET);
+	HAL_Delay(10);
+
+}
+```
+the function have to set and reset the ```EN``` pin as this signals the LCD module that the data on the line now is the data it needs to read and the next Pin set will mean that the next segment is ready
+>***Note***
+> I added a delay of 10ms between setting ```EN``` and Resetting it just to give the LCD module a time to read the sent data 
+<br />
+
+2. ***Data Send Function***
+A function that will break any 8-bit data it recieves and give it to the Write function as two parts (4-bit) while giving value of ```RS``` of ```1```
+```c
+void Lcd_Send_Data(char data){
+	char data_to_send = 0;
+	data_to_send = (data >> 4) & 0x0f ;
+	Lcd_Write(data_to_send,1);
+	data_to_send = data & 0x0f ;
+	Lcd_Write(data_to_send,1);
+}
+```
+
+with the same concept we can make a function that instead of taking 1 byte and break it into 4-bit we can make a function that can take a whole string and break it with the help of the above function
+```c
+void Lcd_Send_String(char *str){
+	while(*str != '\0')
+		Lcd_Send_Data(*str++);
+}
+```
+
