@@ -122,3 +122,47 @@ In this part of the code we define a handler for the timer peripherial & initili
 > In this project i am using HSE as the driving oscillator for all clocks and in nucleo stm32f446re , HSE is bypassed from the oscillator of the debugging circuit with 8MHz
 
 As from the explaination in the servo section above we concluded that the servo will need a signal of `50Hz` , As we getting an `8Mhz` clock dividing that by a prescalar of `160` will lead to `50Khz` clock to the timer , by setting the period to `1000` , the timer will give a signal of exactly `50Hz`
+
+Now we need to configure the channels of the timers 
+
+```c
+TIM_OC_InitTypeDef pwm_config = {0};
+	pwm_config.Pulse = 25;
+	pwm_config.OCMode = TIM_OCMODE_PWM1;
+	pwm_config.OCPolarity = TIM_OCPOLARITY_HIGH;
+
+	if(HAL_TIM_PWM_ConfigChannel(&htim2, &pwm_config, TIM_CHANNEL_1 ) != HAL_OK)
+		Error_Handler();
+
+	if(HAL_TIM_PWM_ConfigChannel(&htim2, &pwm_config, TIM_CHANNEL_2) != HAL_OK)
+		Error_Handler();
+
+	if(HAL_TIM_PWM_ConfigChannel(&htim2, &pwm_config, TIM_CHANNEL_3) != HAL_OK)
+		Error_Handler();
+
+	if(HAL_TIM_PWM_ConfigChannel(&htim2, &pwm_config, TIM_CHANNEL_4 ) != HAL_OK)
+		Error_Handler();
+
+```
+
+> ***Note***
+> We need four PWM signals to control the four motors , since all the PWM signals will use the same base counting `50Hz` we can define 4 channels to supply the 4 signals
+
+Here we defined a structure that holds the parameters of channel configurations and set it to `0` to default any settings before initilizing 
+
+We need to roll back for a second to understand why we have a pulse of 25
+We concluded that to get the servo to be in the default state " 0 degree " we have to supply a signal with only 1ms ON and the rest of the 20ms will be OFF
+``` Math
+Duty Cycle = 1ms / 20ms = 0.05 
+```
+so we need a duty cycle of 5%, Since we have a period of 1000 , The pulse will be `1000 * 0.05 = 50`
+***Thats the number of ticks the timer need to count will making a high signal and after this number is counted he will count the rest of the signal (rest of 1000) will giving low signal***
+
+so the result is `50` ?? , why the pulse is 25 above ?
+As mentioned in the servo section some servo might have a different range than 1ms to 2ms , in my case with my servo it is 0.5ms to 2.5ms which gave a full 180 degree rotate
+So if we repeated the above steps with 0.5ms and 2.ms to find the margins of the pulse we are going to give we find the margins are 25 to 125
+
+### 2. Low Level Initilization
+This includes Enabling clock the timer peripheral , Configuring the pins that is connected to the timer channels and Enabling the clock of the corresponding GPIO
+
+
