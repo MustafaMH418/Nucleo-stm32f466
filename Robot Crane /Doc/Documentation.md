@@ -19,7 +19,7 @@ In this detailed documentation, I will provide a step-by-step breakdown of the m
 
 ![Intro Pic](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/Overview%20pic.jpg)
 
-## Step 1 : The Hardware
+# Step 1 : The Hardware
 ### 1.Circuit
 ![Circuit](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/Robot%20ARM_bb.jpg)
 
@@ -51,7 +51,7 @@ In this detailed documentation, I will provide a step-by-step breakdown of the m
 ### 4. Assembly
 * You can find a step by step assembly instructions [here](https://www.instructables.com/EEZYbotARM/) done by the designer
 
-## Step 2 : Programming
+# Step 2 : Programming
 we are going to talk about the code and the programming of the project using multiple prespectives . 
 * First we need to know how can we control a servo and how a servo work
 * Second we need to generate a PWM signal that can control the servo
@@ -325,6 +325,15 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc){
 ```
 
 ### 3. Starting ADC
+We can start the ADC using 3 methods 
+1. Start with polling
+2. IT Start
+3. DMA Start
+
+We are going to use Start with polling in this project but in future project DMA Start will be used
+Start with polling can be done using `HAL_ADC_Start(ADC_HandleTypeDef* hadc)` 
+
+# 4. Project Integration
 
 
 
