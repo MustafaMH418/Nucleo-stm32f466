@@ -13,9 +13,11 @@ In this detailed documentation, I will provide a step-by-step breakdown of the m
 
 ### Methodology:
 
-* Design: The first step in the project was to design the robot arm. This involved creating a 3D model of the arm and determining the necessary components for the arm's movements.
-* Building: The next step was to build the robot arm. This involved 3D printing the necessary components and assembling them together, including the motors, joints, and potentiometers.
+* Hardware Needed & Building: how to build the robot arm. This involved 3D printing the necessary components and assembling them together, including the motors, joints, and potentiometers.
 * Programming: Once the robot arm was built, the next step was to program the Nucleo STM32F446RE microcontroller. This involved using the STM32 IDE to develop the necessary code for controlling the arm's movements and reading the potentiometer inputs.
 * Testing: Finally, the robot arm was tested to ensure that it was functioning correctly. This involved testing the range of movements and control options available, as well as ensuring that the arm was stable and durable.
 
-![Intro Pic]()
+![Intro Pic](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/Overview%20pic.jpg)
+
+## 1.Hardware
+### 1.Circuit
