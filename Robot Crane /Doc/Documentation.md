@@ -163,6 +163,56 @@ As mentioned in the servo section some servo might have a different range than 1
 So if we repeated the above steps with 0.5ms and 2.ms to find the margins of the pulse we are going to give we find the margins are 25 to 125
 
 ### 2. Low Level Initilization
-This includes Enabling clock the timer peripheral , Configuring the pins that is connected to the timer channels and Enabling the clock of the corresponding GPIO
+This includes Enabling clock to the timer peripheral , Configuring the pins that is connected to the timer channels and Enabling the clock of the corresponding GPIO
+1.Enable Clock :
+This can be done in `HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)` which is called inside `HAL_TIM_PWM_Init` and is defined as weak to give the ability to overwrite it in `msp.c` file
+
+```c
+ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim){
+	__HAL_RCC_TIM2_CLK_ENABLE();
+}
+```
+2. Pins Configurations
+We can include all the code needed for enabling clock of GPIO and configuring pins in a function called `TIM_MspPostInit()` which can be called after all the highlevel initilization 
+```c
+void TIM_MspPostInit(){
+	__HAL_RCC_GPIOA_CLK_ENABLE();	// Enabling clock for GPIOA
+	__HAL_RCC_GPIOB_CLK_ENABLE();	// Enabling clock for GPIOB
+	
+	GPIO_InitTypeDef sPins = {0};
+	sPins.Pin = GPIO_PIN_2 | GPIO_PIN_9 | GPIO_PIN_10;	// TIM Channels in GPIOB
+	sPins.Mode = GPIO_MODE_AF_PP;				// Defined in Alternate function mode to connect it to the TIM2 Channels
+	sPins.Alternate = GPIO_AF1_TIM2;			// Configuring the Alternate function to TIM2
+	HAL_GPIO_Init(GPIOB, &sPins);
+
+	sPins.Pin = GPIO_PIN_15;				// TIM Channel pin in GPIOA
+	HAL_GPIO_Init(GPIOA, &sPins);
+
+	HAL_NVIC_SetPriority(TIM2_IRQn, 15, 0);			// Setting the NVIC Priority of TIM2
+	HAL_NVIC_EnableIRQ(TIM2_IRQn);				// Enabling the interrupt of TIM2
+
+}
+
+3. Starting The Timer
+Now that we finished all the initlization all we need to start the timer with `HAL_TIM_PWM_START(&htim2,TIM_CHANNEL_x)` and this function return the state of the operation(starting timer) if it succeded or failed so we need to compare the return with `HAL_OK`
+```c
+	if(HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1) != HAL_OK)
+			Error_Handler();
+
+	if(HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2) != HAL_OK)
+			Error_Handler();
+
+	if(HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3) != HAL_OK)
+			Error_Handler();
+
+	if(HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4) != HAL_OK)
+			Error_Handler();
+			
+```
+
+>***Note***
+> We need four starting functions as we are using four different channels
+
+
 
 
