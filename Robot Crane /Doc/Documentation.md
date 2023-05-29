@@ -9,7 +9,7 @@
 * The project was designed to showcase the potential of low-cost, versatile, and precise robotic solutions using the ARM Nucleo STM32F446RE microcontroller.
 Detailed Explanation:
 
-In this detailed documentation, I will provide a step-by-step breakdown of the methodology used to design and build the robot arm using the ARM Nucleo STM32F446RE microcontroller. I will discuss the hardware and software components used in the project, including the Nucleo STM32F446RE microcontroller, the 3D printing technology, and the potentiometers. Additionally, Iwill present the results obtained from the project, including the range of control options and the versatility of the robot arm.
+In this detailed documentation, I will provide a step-by-step breakdown of the methodology used to design and build the robot arm using the ARM Nucleo STM32F446RE microcontroller. I will discuss the hardware and software components used in the project, including the Nucleo STM32F446RE microcontroller, the 3D printing technology, and the potentiometers. Additionally, I will present the results obtained from the project, including the range of control options and the versatility of the robot arm.
 
 ### Methodology:
 
@@ -22,6 +22,10 @@ In this detailed documentation, I will provide a step-by-step breakdown of the m
 ## Step 1 : The Hardware
 ### 1.Circuit
 ![Circuit](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/Robot%20ARM_bb.jpg)
+
+>***Note*** </br>
+> * I added an external power supply with 5V - 2A to give the servos a little more power to work with the strucre of the arm </br>
+> * It is very important to connect the ground of the power supply to the ground of the microcontroller as showen in the circuit above as we are working with PWM signal which is a relative signal and needs a common ground reference.
 
 ### 2. List of Components
 | Part Type | Amount | 
@@ -164,7 +168,9 @@ So if we repeated the above steps with 0.5ms and 2.ms to find the margins of the
 
 ### 2. Low Level Initilization
 This includes Enabling clock to the timer peripheral , Configuring the pins that is connected to the timer channels and Enabling the clock of the corresponding GPIO
-1.Enable Clock :
+
+
+1.Enable Clock :</br>
 This can be done in `HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)` which is called inside `HAL_TIM_PWM_Init` and is defined as weak to give the ability to overwrite it in `msp.c` file
 
 ```c
@@ -172,7 +178,7 @@ This can be done in `HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)` which is call
 	__HAL_RCC_TIM2_CLK_ENABLE();
 }
 ```
-2. Pins Configurations
+2. Pins Configurations : </br>
 We can include all the code needed for enabling clock of GPIO and configuring pins in a function called `TIM_MspPostInit()` which can be called after all the highlevel initilization 
 ```c
 void TIM_MspPostInit(){
@@ -192,9 +198,11 @@ void TIM_MspPostInit(){
 	HAL_NVIC_EnableIRQ(TIM2_IRQn);				// Enabling the interrupt of TIM2
 
 }
+```
 
-3. Starting The Timer
+3. Starting The Timer : </br>
 Now that we finished all the initlization all we need to start the timer with `HAL_TIM_PWM_START(&htim2,TIM_CHANNEL_x)` and this function return the state of the operation(starting timer) if it succeded or failed so we need to compare the return with `HAL_OK`
+
 ```c
 	if(HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1) != HAL_OK)
 			Error_Handler();
@@ -213,6 +221,53 @@ Now that we finished all the initlization all we need to start the timer with `H
 >***Note***
 > We need four starting functions as we are using four different channels
 
+## 3. ADC
+* ADC stands for Analog-to-Digital Converter. It is an electronic device that converts an analog signal, such as a voltage or current, into a digital representation that can be processed by a computer or other digital system.
+* Analog signals are continuous and can take on any value within a certain range. In order to process an analog signal using a digital system, it must first be converted into a digital representation that consists of a series of discrete numbers. This is where an ADC comes in.
+* An ADC works by sampling the analog signal at regular intervals and converting each sample into a digital value that represents the amplitude of the signal at that point in time. The number of bits used to represent each sample determines the resolution of the ADC and the accuracy of the digital representation.
+* ADCs are used in a wide range of applications, including audio and video processing, data acquisition and control systems, communication systems, and measurement and instrumentation systems. They are an essential component in many electronic systems, allowing analog signals to be processed and analyzed using digital techniques.
 
+![ADC](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/G3Mgs.png)
 
+There are three main modes of operation for ADC sampling: single, scan, and continuous.</br>
+* ***Single mode*** : </br>
+In single mode, the ADC samples a single input channel once and produces a single output value. This mode is useful for applications that require occasional or infrequent sampling of a single channel.
+
+* ***Scan mode*** : </br>
+In scan mode, the ADC samples a predetermined set of input channels in a sequential manner and produces a corresponding set of output values. This mode is useful for applications that require periodic sampling of multiple channels, such as monitoring multiple sensors.
+
+* ***Continuous mode*** : </br>
+In continuous mode, the ADC samples a single input channel repeatedly at a fixed rate and produces a continuous stream of output values. This mode is useful for applications that require real-time monitoring of a single channel, such as audio or video processing.
+
+Each of these modes has its own advantages and disadvantages. Single mode is simple and efficient, but it may not be suitable for applications that require frequent sampling of multiple channels. Scan mode is useful for monitoring multiple channels, but it may introduce delays between samples and may not provide real-time data. Continuous mode provides real-time data, but it may consume more power than other modes and may introduce noise due to the constant sampling.
+
+The choice of mode depends on the specific requirements of the application, including the desired sampling rate, number of channels, power consumption, and data processing requirements.</br>
+
+***Same as the PWM initilization we are going to need to do a High Level Initlization , Low Level Initlization and Start the ADC***
+
+### 1. High Level Initlization
+This includes defining a handler for the timer and configuring the channels of the ADC
+
+```c
+void ADC_Init(){
+ADC_HandleTypeDef sADC = {0};
+	sADC.Instance = ADC1;							// Base Address of ADC1
+	sADC.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;			// a prescalar which will divide the incoming clock by 2
+	sADC.Init.Resolution = ADC_RESOLUTION_12B;				// Setting the resolution of the ADC to 12-bits which is the highest resolution in stm32f446re
+	sADC.Init.ScanConvMode = DISABLE;					// Disabling the Scan mode of the adc
+	sADC.Init.ContinuousConvMode = DISABLE;					// Disabling the continous mode of the adc
+	sADC.Init.DiscontinuousConvMode = DISABLE;				// Disabling the discontinous mode of the adc
+	sADC.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;		// Setting the External trigger for conversation to NONE as the external trigger depends on a software start 
+	sADC.Init.ExternalTrigConv = ADC_SOFTWARE_START;			// Setting The External trigger for conversation to a software start
+	sADC.Init.DataAlign = ADC_DATAALIGN_RIGHT;				// Setting Data Align to the Right
+	sADC.Init.NbrOfConversion = 1;						// Number of conversation is set to 1 as we are doing a channel by channel conversation
+	sADC.Init.DMAContinuousRequests = DISABLE;				// Disabling DMA requests as we are not using DMA in this project to take values from ADC
+	sADC.Init.EOCSelection = ADC_EOC_SINGLE_CONV;				// ADC will generate an end of conversion (EOC) flag after a single conversion is completed.
+	  if (HAL_ADC_Init(&sADC) != HAL_OK)
+	  {
+	    Error_Handler();
+	  }
+
+}
+```
 
