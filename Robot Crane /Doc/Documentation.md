@@ -104,8 +104,8 @@ Here are the basic steps for controlling a servo using PWM:</br>
 
 ****So we need to initlize a timer that can produce a PWM ( Advanced timer ) , in nucleo stm32f446re we can use timer2****
 To initilize the timer we need to do some steps 
-1. High level initilization
-2. Low level initilization
+1. High level Initilization
+2. Low level Initilization
 3. Starting the timer
 
 ### 1. High Level Initilization
@@ -179,7 +179,7 @@ This can be done in `HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)` which is call
 }
 ```
 2. Pins Configurations : </br>
-We can include all the code needed for enabling clock of GPIO and configuring pins in a function called `TIM_MspPostInit()` which can be called after all the highlevel initilization 
+We can include all the code needed for enabling clock of GPIO and configuring pins in a function called `TIM_MspPostInit()` which can be called after all the highlevel Initilization 
 ```c
 void TIM_MspPostInit(){
 	__HAL_RCC_GPIOA_CLK_ENABLE();	// Enabling clock for GPIOA
@@ -243,9 +243,9 @@ Each of these modes has its own advantages and disadvantages. Single mode is sim
 
 The choice of mode depends on the specific requirements of the application, including the desired sampling rate, number of channels, power consumption, and data processing requirements.</br>
 
-***Same as the PWM initilization we are going to need to do a High Level Initlization , Low Level Initlization and Start the ADC***
+***Same as the PWM Initilization we are going to need to do a High Level Initlization , Low Level Initlization and Start the ADC***
 
-### 1. High Level Initlization
+### 1. High Level Initilization
 This includes defining a handler for the timer and configuring the channels of the ADC
 
 ```c
@@ -263,11 +263,69 @@ ADC_HandleTypeDef sADC = {0};
 	sADC.Init.NbrOfConversion = 1;						// Number of conversation is set to 1 as we are doing a channel by channel conversation
 	sADC.Init.DMAContinuousRequests = DISABLE;				// Disabling DMA requests as we are not using DMA in this project to take values from ADC
 	sADC.Init.EOCSelection = ADC_EOC_SINGLE_CONV;				// ADC will generate an end of conversion (EOC) flag after a single conversion is completed.
+	  
 	  if (HAL_ADC_Init(&sADC) != HAL_OK)
-	  {
-	    Error_Handler();
-	  }
+	  	    Error_Handler();
+}
+```
+In configuring channels we come to a little different approach. To Read from Multiple Channels in ADC it is best to do a Scan mode with DMA , but to simplify the project a little as the DMA will require its own initilizations with a timer to be a trigger for scanning we are gonna use the single conversation mode while switching between channels to get values. this can done by having four functions , each function will have a job of just redefinig the working channel to the next channel to be scanned ( This can be done also with a single function and giving the channel as argument to switch to it ) while stopping the ADC after each channel value is read and starting back after the channel is redefined to the next channel
+
+```c
+void ADC_SET_CH0(){
+	ADC_ChannelConfTypeDef CHConf = {0};
+	CHConf.Channel = ADC_CHANNEL_0;
+	CHConf.Rank = 1;
+	CHConf.SamplingTime = ADC_SAMPLETIME_84CYCLES;
+	
+	if(HAL_ADC_ConfigChannel(&sADC, &CHConf) != HAL_OK)
+		Error_Handler();
+}
+
+void ADC_SET_CH1(){
+	ADC_ChannelConfTypeDef CHConf = {0};
+	CHConf.Channel = ADC_CHANNEL_1;
+	CHConf.Rank = 1;
+	CHConf.SamplingTime = ADC_SAMPLETIME_84CYCLES;
+	
+	if(HAL_ADC_ConfigChannel(&sADC, &CHConf) != HAL_OK)
+		Error_Handler();
+}
+
+void ADC_SET_CH4(){
+	ADC_ChannelConfTypeDef CHConf = {0};
+	CHConf.Channel = ADC_CHANNEL_4;
+	CHConf.Rank = 1;
+	CHConf.SamplingTime = ADC_SAMPLETIME_84CYCLES;
+	
+	if(HAL_ADC_ConfigChannel(&sADC, &CHConf) != HAL_OK)
+		Error_Handler();
+}
+
+```
+
+### 2. Low Level Initilization
+This includes Enabling clock to the ADC peripheral , Configuring the pins that is connected to the ADC channels and Enabling the clock of the corresponding GPIO
+
+This can be done in `HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)` which is called inside `HAL_ADC_Init` and is defined as weak to give the ability to overwrite it in `msp.c` file
+
+```c
+void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc){
+	__HAL_RCC_ADC1_CLK_ENABLE();	// Enabling Clock for the ADC1
+	
+	GPIO_InitTypeDef sPins = {0};
+	sPins.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_4;	// Pins that is connecte to ADC Channels 0,1,4
+	sPins.Mode = GPIO_MODE_ANALOG;				// Setting Mode to Analog
+	sPins.Pull = GPIO_PULLDOWN;
+	HAL_GPIO_Init(GPIOA, &sPins);
+
+	HAL_NVIC_SetPriority(ADC_IRQn, 15, 0);			// Setting NVIC Priority for the ADC Interrupt
+	HAL_NVIC_EnableIRQ(ADC_IRQn);				// Enabling ADC Interrupt
 
 }
 ```
+
+### 3. Starting ADC
+
+
+
 
