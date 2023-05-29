@@ -55,3 +55,28 @@ we are going to talk about the code and the programming of the project using mul
 * Finally we are going to link all of this together to have a functional Robot
 
 ## 1. The Servo
+### What is servo motor ?
+A servo motor is a type of motor that is commonly used in robotics and other applications that require precise control of angular position. Servo motors are designed to rotate to a specific angle and hold that position, allowing them to be used in a wide range of applications where precise control is needed.
+
+A servo motor consists of a rotor, a stator, and a control circuit. The rotor is a permanent magnet that rotates around a central axis, while the stator is a series of coils that generate a magnetic field when an electrical current is passed through them. The control circuit is responsible for receiving commands from an external source and adjusting the position of the rotor accordingly.
+
+### Servo pinout
+
+![servoPins](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/servo_pinout.png)
+
+1. ***Power***:This wire provides power to the servo motor, typically in the range of 4.8 to 6 volts.
+3. ***Ground***: This wire is connected to ground and completes the electrical circuit.
+5. ***Signal***: This wire carries the control signal from the microcontroller or other control device to the servo motor. The signal is typically a PWM (Pulse Width Modulation) signal that controls the position of the servo motor.
+
+### How to control the servo motor ?
+To control a servo , you need to send a series of pulses to the servo motor, with the width of each pulse determining the position of the servo. 
+![ServoPWM](
+Here are the basic steps for controlling a servo using PWM:
+
+Determine the PWM frequency: The first step is to determine the PWM frequency you want to use. This will depend on the specific servo motor you are working with, but a common frequency is 50 Hz.
+
+Determine the pulse width range: The next step is to determine the pulse width range for the servo motor. This will also depend on the specific servo motor, but a common range is 1000 to 2000 microseconds.
+
+Calculate the pulse width for the desired position: Once you know the pulse width range, you can calculate the pulse width for the desired position. For example, if you want the servo to be at 90 degrees, you would use a pulse width of 1500 microseconds (the midpoint of the pulse width range).
+
+Send the PWM signal: Finally, you can send the PWM signal to the servo motor using a microcontroller or other control device. This involves sending a series of pulses at the chosen frequency, with the width of each pulse corresponding to the desired position of the servo.
