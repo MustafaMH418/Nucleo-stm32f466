@@ -498,3 +498,9 @@ What is Logic Analyzer ?
 * Logic analyzers typically have multiple input channels that can capture digital signals from a variety of sources, such as microprocessors, memories, buses, and other digital circuits. The captured data is then displayed on a computer screen, where it can be analyzed and decoded to help identify problems or errors in the system.</br>
  * Logic analyzers can capture data at high speeds and with high accuracy, making them useful for debugging complex digital systems. They can also be used to trigger on specific events or conditions, allowing developers to capture data when certain events occur in the system.</br>
 
+To use logic analyzer we need a designated software which is Logic 2 ( a Saleae Software ) nd connecting the output of the PWM channel to the input channels of the logic analyzer
+![Logic2](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/Logic2.jpg)
+
+The program can show us the clock measured by the logic analyzer , the duty cycle and the duration of On and OFF time in each cycle which is very usefull when trying to debug and find a problem
+As we see the PWm is outputing ~50Hz clock with 2.5% duty cycle which is the zero state of the Servos
+
