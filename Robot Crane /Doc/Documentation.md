@@ -335,6 +335,142 @@ Start with polling can be done using `HAL_ADC_Start(ADC_HandleTypeDef* hadc)`
 
 # 4. Project Integration
 
+FLow of data in project : 
+Potentiometer is set to a certain value -> ADC will read this value -> Convert the value of the ADC to the range of PWM -> Set PWM CCRx Register with the corresponding value
 
+So we need to maintain some steps to achieve these sequence of events
+1. Start The PWM 
+2. Select ADC Channel
+3. Start the ADC
+4. Take values of potentiometers
+5. Convert values to PWM range
+6. Set new value to PWM compare register
+7. Stop the ADC
+8. Repeat
 
+### 1. Starting PWM
+we need to start the timer in PWM mode to start generating the 50Hz signal , we can initiate the value of the PWM channels with 75 which will set the arm to a standing position
+```c
+	if(HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1) != HAL_OK)
+			Error_Handler();
+
+	if(HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2) != HAL_OK)
+			Error_Handler();
+
+	if(HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3) != HAL_OK)
+			Error_Handler();
+
+	if(HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4) != HAL_OK)
+			Error_Handler();
+```
+
+### 2. Selecting ADC Channel
+We can simply use one of the functions we obtained earlier in the ADC Channel Configuration section ex: `ADC_SET_CH0()`
+
+### 3. Starting ADC
+ADC can be started using one of HAL layer functions `HAL_ADC_Start(&sADC)` which will start it using polling
+
+### 4. Taking Values
+Since we are working with Polling in ADC we can use another function in HAL called `HAL_ADC_PollForConversion(&sADC, 1000)` which takes the address of the handler structure of ADC and Max time for polling
+
+### 5. Converting Values
+This is crucial since we are using ADC in resolution of 12 bits which lead to a value ranging from 0 - 4095 while we need a range of 25 - 125 for the pwm. We can use the following function to convert the value to the new range
+```c
+int convert_adc_reading(int adc_reading) {
+    int result = (adc_reading * 100) / 4095;  // Scale the reading to the range of 0-100
+    result += 25;  // Shift the reading to the range of 25-125
+    return result;
+}
+```
+
+### 6. Setting the new value of PWM CCRx
+To set the new value we can use one of the macros provided in HAL which is `__HAL_TIM_SET_COMPARE(__HANDLE__, __CHANNEL__, __COMPARE__)` 
+
+### 7. Stopping the ADC
+Since we need to redefine the channel we need to stop the ADC and restart it to avoid any problems using `HAL_ADC_STOP(&sADC)` ( This is not a problem if we were using DMA )
+
+### 8. Repeat
+By Repeating all the above we come a code which will be like this : 
+
+```c
+while(1){
+		ADC_SET_CH0();
+		HAL_ADC_Start(&sADC);
+		HAL_ADC_PollForConversion(&sADC, 1000);
+		value[0] = convert_adc_reading(HAL_ADC_GetValue(&sADC));
+		HAL_ADC_Stop(&sADC);
+		__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_1,value[0]);
+
+		ADC_SET_CH1();
+		HAL_ADC_Start(&sADC);
+		HAL_ADC_PollForConversion(&sADC, 1000);
+		value[1] = convert_adc_reading(HAL_ADC_GetValue(&sADC));
+		HAL_ADC_Stop(&sADC);
+		__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,value[1]);
+
+		ADC_SET_CH2();
+		HAL_ADC_Start(&sADC);
+		HAL_ADC_PollForConversion(&sADC, 1000);
+		value[2] = convert_adc_reading(HAL_ADC_GetValue(&sADC));
+		HAL_ADC_Stop(&sADC);
+		__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_3,value[2]);
+
+		HAL_Delay(10);
+	}
+```
+
+### 9. Something Extra
+For the grapping servo i am not using any potentiometers since it will have only two states ( Open Claw , Closed Claw )
+-> So simply i am using a button to either open the claw or close it which will need it is own initialization 
+**The process will be as following**
+
+Button Pressed -> Interrupt will rise -> Check if claw is opened or closed -> Set the value of PWM as set or close depending on state
+
+***I am using the integrated button in the microcontroller board which corresponds to pin 13 in GPIOC (PC13)***
+
+1. Configuring the button :
+```c
+void Button_init(){
+		GPIO_InitTypeDef Button = {0};
+		Button.Pin = GPIO_PIN_13;
+		Button.Mode = GPIO_MODE_IT_RISING;	// Setting Mode to interrupt rising 
+		Button.Pull = GPIO_PULLDOWN;
+		HAL_GPIO_Init(GPIOC, &Button);
+
+		HAL_NVIC_SetPriority(EXTI15_10_IRQn, 15, 0);	// Setting priority of corresponding EXTI_line IRQ of Pin 13
+		HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);		// Enabling The interrupt of corresponding EXTI_line IRQ of Pin 13
+}
+```
+
+2. Configuring the Interrupt
+```c
+void EXTI15_10_IRQHandler(){
+	if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_13)!= RESET) {
+				HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+			}
+		else{
+			Error_Handler();
+		}
+}
+```
+
+***Since EXTI15_10 is responsible for all pins numbered between 10 and 15 , I just check that the interrupt coming is indeed for the Pin 13***
+`HAL_GPIO_EXTI_IRQHandler()` Will chech for the reason of interrupt and lead to a callback function 
+
+3. Callback
+Here we can implement the logic behind closing or opening the claw
+```c
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if(Claw_Flag == 1){	//Claw is open , Setting 25 value will lead to closing it
+	  __HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_4,25); // Closing Claw
+	  Claw_Flag = 0;
+  }
+  else{	// Claw is closed , Setting value to 75 will open the claw
+	  __HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_4,75); // Closing Claw
+	  	  Claw_Flag = 1;
+  }
+}
+```
+***Setting value to 75 instead of 125 lead to a good opening of the claw but not too much as 125 gives a 180 degree motion which is more than the claw need***
 
