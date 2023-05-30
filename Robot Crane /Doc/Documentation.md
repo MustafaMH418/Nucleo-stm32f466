@@ -17,7 +17,9 @@ In this detailed documentation, I will provide a step-by-step breakdown of the m
 * Programming: Once the robot arm was built, the next step was to program the Nucleo STM32F446RE microcontroller. This involved using the STM32 IDE to develop the necessary code for controlling the arm's movements and reading the potentiometer inputs.
 * Testing: Finally, the robot arm was tested to ensure that it was functioning correctly. This involved testing the range of movements and control options available, as well as ensuring that the arm was stable and durable.
 
-![Intro Pic](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/Overview%20pic.jpg)
+<p align="center">
+  <img src="https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/Overview%20pic.jpg" alt="Alt text"/>
+</p>
 
 # Step 1 : The Hardware
 ### 1.Circuit
@@ -28,6 +30,7 @@ In this detailed documentation, I will provide a step-by-step breakdown of the m
 > * It is very important to connect the ground of the power supply to the ground of the microcontroller as showen in the circuit above as we are working with PWM signal which is a relative signal and needs a common ground reference.
 
 ### 2. List of Components
+
 | Part Type | Amount | 
 |:---------:|:--------:|
 | Nucleo STM32f446RE | 1 |
@@ -66,7 +69,9 @@ A servo motor consists of a rotor, a stator, and a control circuit. The rotor is
 
 ### Servo pinout
 
-![servoPins](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/servo_pinout.png)
+<p align="center">
+  <img src="https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/servo_pinout.png" alt="Alt text"/>
+</p>
 
 1. ***Power***:This wire provides power to the servo motor, typically in the range of 4.8 to 6 volts.
 3. ***Ground***: This wire is connected to ground and completes the electrical circuit.
@@ -75,9 +80,9 @@ A servo motor consists of a rotor, a stator, and a control circuit. The rotor is
 ### How to control the servo motor ?
 To control a servo , you need to send a series of pulses to the servo motor, with the width of each pulse determining the position of the servo.
 
-
-![ServoPWM](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/servo-control-2.png)
-
+<p align="center">
+  <img src="https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/servo-control-2.png" alt="Alt text"/>
+</p>
 
 Here are the basic steps for controlling a servo using PWM:</br>
 1. Determine the PWM frequency: The first step is to determine the PWM frequency you want to use. This will depend on the specific servo motor you are working with, but a common frequency is 50 Hz.</br>
@@ -227,7 +232,9 @@ Now that we finished all the initlization all we need to start the timer with `H
 * An ADC works by sampling the analog signal at regular intervals and converting each sample into a digital value that represents the amplitude of the signal at that point in time. The number of bits used to represent each sample determines the resolution of the ADC and the accuracy of the digital representation.
 * ADCs are used in a wide range of applications, including audio and video processing, data acquisition and control systems, communication systems, and measurement and instrumentation systems. They are an essential component in many electronic systems, allowing analog signals to be processed and analyzed using digital techniques.
 
-![ADC](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/G3Mgs.png)
+<p align="center">
+  <img src="https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/G3Mgs.png" alt="Alt text"/>
+</p>
 
 There are three main modes of operation for ADC sampling: single, scan, and continuous.</br>
 * ***Single mode*** : </br>
@@ -499,8 +506,18 @@ What is Logic Analyzer ?
  * Logic analyzers can capture data at high speeds and with high accuracy, making them useful for debugging complex digital systems. They can also be used to trigger on specific events or conditions, allowing developers to capture data when certain events occur in the system.</br>
 
 To use logic analyzer we need a designated software which is Logic 2 ( a Saleae Software ) nd connecting the output of the PWM channel to the input channels of the logic analyzer
-![Logic2](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/Logic2.jpg)
 
-The program can show us the clock measured by the logic analyzer , the duty cycle and the duration of On and OFF time in each cycle which is very usefull when trying to debug and find a problem
+<p align="center">
+  <img src="https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/Logic2.jpg" alt="Alt text"/>
+</p>
+
+The program can show us the clock measured by the logic analyzer , the duty cycle and the duration of On and OFF time in each cycle which is very usefull when trying to debug and find a problem</br>
 As we see the PWm is outputing ~50Hz clock with 2.5% duty cycle which is the zero state of the Servos
 
+If we max the value to check for upper margin :
+![MaxLogic](https://github.com/MustafaMH418/Nucleo-stm32f466/blob/main/Robot%20Crane%20/Doc/Matrials/MaxLogic.jpg)
+
+We observe that everything is working properly with max value getting us a 12.5% duty cycle on a 50Hz signal
+
+# Conclusion
+The Robot arm project using ADC and PWM on STM32F446RE Nucleo board is a project that demonstrates the power and versatility of the STM32F446RE Nucleo board. By utilizing ADC and PWM, the project is able to accurately sense and control the position and movement of the robotic arm. The project provides a comprehensive guide for anyone interested in building a similar project, with step-by-step instructions and simplified explanations for each peripheral used.
